@@ -5,6 +5,7 @@ Script   : main.py
 Copyright: LiKneu 2019
 '''
 
+import os
 import sys
 import glob
 from PyQt5.Qt import Qt
@@ -53,24 +54,30 @@ class MyWindow(QMainWindow):
     def input_changed(self):
         '''Handling of the users input is mainly done here.'''
 
+        # Try to split the user input into the parts 'command' and 'user_input'.
+        # The delimiter is a space. Thus it's possible to have commands of arbi-
+        # trary length.
+        try:
+            command, user_input = self.le_input.text().split(' ', 1)
+            print(f'\tUser input: <{command}>, <{user_input}>')
+        except:
+            # List Widget hat to be cleared if no valid user input is available
+            self.lst.clear()
+            return
+
         # Handling of bookmarks
-        my_bookmarks = self.read_bookmark_files()
-        
-        if self.le_input.text().startswith('#b') and len(self.le_input.text()) <= 3:
-            # ~ my_bookmarks = self.read_bookmark_files()
+        if command == 'b' and user_input == '':
+            my_bookmarks = self.read_bookmark_files()
             self.lst.clear()
             for bm in my_bookmarks:
                 self.lst.addItem(bm)
-
-        if len(self.le_input.text()) > 3:
-            command, user_input = self.le_input.text().split(' ', 1)
+        elif command == 'b' and user_input:
+            my_bookmarks = self.read_bookmark_files()
             self.lst.clear()
             for bm in my_bookmarks:
                 if user_input.lower() in bm.lower():
                     self.lst.addItem(bm)
-            
-        # Clear the list in case no user input available
-        if len(self.le_input.text()) < 2:
+        else:
             self.lst.clear()
 
     def line_edit_return(self):
@@ -79,18 +86,29 @@ class MyWindow(QMainWindow):
         # Get the text of the topmost item
         if self.lst.item(0):
             bookmark_key = self.lst.item(0).text()
-            print('LE ->', bookmark_key)
+            # TODO: remove print statement
+            print('\tBookmark title:', bookmark_key)
             my_bookmarks = self.read_bookmark_files()
-            print(my_bookmarks[bookmark_key])
+            # TODO: remove print statement
+            print('\tBookmark command:', my_bookmarks[bookmark_key])
+            self.run_command(my_bookmarks[bookmark_key])
 
     def list_return(self):
         '''Returns the selected list item on RETURN'''
         if self.lst.currentItem():
             bookmark_key = self.lst.currentItem().text()
-            print('LI ->', bookmark_key)
+            # TODO: remove print statement
+            print('\tBookmark title:', bookmark_key)
             my_bookmarks = self.read_bookmark_files()
-            print(my_bookmarks[bookmark_key])
+            # TODO: remove print statement
+            print('\tBookmark command:', my_bookmarks[bookmark_key])
+            self.run_command(my_bookmarks[bookmark_key])
 
+    def run_command(self, command):
+        '''Runs the command provided by Line Edit or List Widget.'''
+        # TODO: Remove print statement
+        print(f'Try to run command: {command}')
+        os.system(command)
 
     def read_bookmark_files(self, filetype='_bookmarks.txt'):
         """Returns a list of lists containing the bookmarks titles and URLs."""
