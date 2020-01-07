@@ -10,6 +10,7 @@ import sys
 import glob
 from PyQt5.Qt import Qt
 from PyQt5 import QtWidgets
+from PyQt5.QtCore import QEvent
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QMainWindow
 
@@ -31,23 +32,37 @@ class MyWindow(QMainWindow):
         # Line Edit
         self.le_input = QtWidgets.QLineEdit(self)
         self.le_input.setGeometry(2, 0, 246, 30)
-        self.le_input.setPlaceholderText('# indicates wanted activity')
+        self.le_input.setPlaceholderText('<command> <input>')
         self.le_input.setClearButtonEnabled(True)
+        self.le_input.installEventFilter(self)
         self.le_input.textChanged.connect(self.input_changed)
-        self.le_input.returnPressed.connect(self.line_edit_return)
 
         # List Widget
         self.lst = QtWidgets.QListWidget(self)
         self.lst.setSortingEnabled(True)
         self.lst.setAlternatingRowColors(True)
         self.lst.setGeometry(2, 30, 246, 100)
-        # There is no returnPressed event for the List Widget
-        # ~ self.lst.returnPressed.connect(self.list_return)
+        self.lst.installEventFilter(self)
+
+    def eventFilter(self, obj, event):
+        '''Event filter needed to catch the change of focus.'''
+        if event.type() == QEvent.FocusIn:
+            if obj == self.lst:
+                print('List Widget')
+                self.FOCUS = 'List Widget'
+            if obj == self.le_input:
+                print('Line Edit')
+                self.FOCUS = 'Line Edit'
+                # Deselect all list items if List Widget looses the focus
+                self.lst.setCurrentRow(0)
+                self.lst.clearSelection()
+
+        return super(MyWindow, self).eventFilter(obj, event)
 
     def keyPressEvent(self, event):
-        # ~ print(event.key())
+        '''Detect that the RETURN key was pressed.'''
         if event.key() == Qt.Key_Return:
-            self.list_return()
+            self.return_pressed()
         elif event.key() == Qt.Key_Enter:
             print('Enter')
 
@@ -80,6 +95,15 @@ class MyWindow(QMainWindow):
         else:
             self.lst.clear()
 
+    def return_pressed(self):
+        print('return_pressed', self.FOCUS)
+        if self.FOCUS == 'List Widget':
+            self.list_return()
+        elif self.FOCUS == 'Line Edit':
+            self.line_edit_return()
+        else:
+            print('Error in RETURN handler')
+
     def line_edit_return(self):
         '''Returns the first item of the list on RETURN in line edit field.'''
 
@@ -108,6 +132,8 @@ class MyWindow(QMainWindow):
         '''Runs the command provided by Line Edit or List Widget.'''
         # TODO: Remove print statement
         print(f'Try to run command: {command}')
+        # FIXIT: In case the app runs on Linux add '&' to the command
+        # ~ command = command + ' &'
         os.system(command)
 
     def read_bookmark_files(self, filetype='_bookmarks.txt'):
