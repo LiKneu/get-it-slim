@@ -22,8 +22,8 @@ class MyWindow(QMainWindow):
     def __init__(self):
         '''Initializes the Main Window'''
         super(MyWindow, self).__init__()
-        self.setGeometry(800, 200, 250, 300)
-        self.setWindowTitle('gis')
+        self.setGeometry(800, 200, 250, 137)
+        self.setWindowTitle('g-i-s     v.2020-01-08')
         self.init_ui()
 
     def init_ui(self):
@@ -41,7 +41,7 @@ class MyWindow(QMainWindow):
         self.lst = QtWidgets.QListWidget(self)
         self.lst.setSortingEnabled(True)
         self.lst.setAlternatingRowColors(True)
-        self.lst.setGeometry(2, 30, 246, 100)
+        self.lst.setGeometry(2, 35, 246, 100)
         self.lst.installEventFilter(self)
 
     def eventFilter(self, obj, event):
@@ -76,8 +76,9 @@ class MyWindow(QMainWindow):
             command, user_input = self.le_input.text().split(' ', 1)
             print(f'\tUser input: <{command}>, <{user_input}>')
         except:
-            # List Widget hat to be cleared if no valid user input is available
+            # List Widget has to be cleared if no valid user input is available
             self.lst.clear()
+            self.main_win_small()
             return
 
         # Handling of bookmarks
@@ -86,14 +87,25 @@ class MyWindow(QMainWindow):
             self.lst.clear()
             for bm in my_bookmarks:
                 self.lst.addItem(bm)
+            self.main_win_large()
         elif command == 'b' and user_input:
             my_bookmarks = self.read_bookmark_files()
             self.lst.clear()
             for bm in my_bookmarks:
                 if user_input.lower() in bm.lower():
                     self.lst.addItem(bm)
+            self.main_win_large()
         else:
             self.lst.clear()
+            self.main_win_small()
+
+    def main_win_large(self):
+        '''Set dimensions of main window so that all widgets can be seen.'''
+        self.resize(250, 137)
+
+    def main_win_small(self):
+        '''Set dimensions of main window so that just Line Edit can be seen.'''
+        self.resize(250, 32)
 
     def return_pressed(self):
         print('return_pressed', self.FOCUS)
