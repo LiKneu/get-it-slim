@@ -22,8 +22,8 @@ class MyWindow(QMainWindow):
     def __init__(self):
         '''Initializes the Main Window'''
         super(MyWindow, self).__init__()
-        self.setGeometry(800, 200, 250, 137)
-        self.setWindowTitle('g-i-s     v.2020-01-08')
+        self.setGeometry(800, 200, 300, 167)
+        self.setWindowTitle('g-i-s     v.2020-01-09')
         self.init_ui()
         self.user_command = ''
         self.user_input = ''
@@ -33,7 +33,7 @@ class MyWindow(QMainWindow):
 
         # Line Edit
         self.le_input = QtWidgets.QLineEdit(self)
-        self.le_input.setGeometry(2, 0, 246, 30)
+        self.le_input.setGeometry(2, 0, 296, 30)
         self.le_input.setPlaceholderText('<command> <input>')
         self.le_input.setClearButtonEnabled(True)
         self.le_input.installEventFilter(self)
@@ -43,7 +43,7 @@ class MyWindow(QMainWindow):
         self.lst = QtWidgets.QListWidget(self)
         self.lst.setSortingEnabled(True)
         self.lst.setAlternatingRowColors(True)
-        self.lst.setGeometry(2, 35, 246, 100)
+        self.lst.setGeometry(2, 35, 296, 130)
         self.lst.installEventFilter(self)
 
     def eventFilter(self, obj, event):
@@ -108,11 +108,11 @@ class MyWindow(QMainWindow):
 
     def main_win_large(self):
         '''Set dimensions of main window so that all widgets can be seen.'''
-        self.resize(250, 137)
+        self.resize(300, 167)
 
     def main_win_small(self):
         '''Set dimensions of main window so that just Line Edit can be seen.'''
-        self.resize(250, 32)
+        self.resize(300, 32)
 
     def return_pressed(self):
         print('return_pressed', self.FOCUS)
@@ -125,7 +125,7 @@ class MyWindow(QMainWindow):
                 settings = self.read_config_file()
                 cmd = settings['PCR-URL']
                 cmd = cmd + self.user_input
-                self.rund_command(cmd)
+                self.run_command(cmd)
             # Handle CSCs
             elif self.user_command == 'c' and self.user_input:
                 settings = self.read_config_file()
@@ -161,11 +161,19 @@ class MyWindow(QMainWindow):
 
     def run_command(self, command):
         '''Runs the command provided by Line Edit or List Widget.'''
+        my_os = os.name
         # TODO: Remove print statement
+        print('OS:', my_os)
         print(f'Try to run command: {command}')
         # FIXIT: In case the app runs on Linux add '&' to the command
-        # ~ command = command + ' &'
-        os.system(command)
+        if my_os == 'posix':
+            command = command + ' &'
+            os.system(command)
+        elif my_os == 'windows':
+            command = 'start ' + command
+            os.system(command)
+        else:
+            print(f'Unknown OS: {my_os}. Script might not work as expected.')
 
     def read_bookmark_files(self, filetype='_bookmarks.txt'):
         """Returns a list of lists containing the bookmarks titles and URLs."""
