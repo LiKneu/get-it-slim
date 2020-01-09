@@ -25,6 +25,8 @@ class MyWindow(QMainWindow):
         self.setGeometry(800, 200, 250, 137)
         self.setWindowTitle('g-i-s     v.2020-01-08')
         self.init_ui()
+        self.user_command = ''
+        self.user_input = ''
 
     def init_ui(self):
         '''Initializes the elements on the Main Window'''
@@ -73,28 +75,33 @@ class MyWindow(QMainWindow):
         # The delimiter is a space. Thus it's possible to have commands of arbi-
         # trary length.
         try:
-            command, user_input = self.le_input.text().split(' ', 1)
-            print(f'\tUser input: <{command}>, <{user_input}>')
+            self.user_command, self.user_input = self.le_input.text().split(' ', 1)
+            print(f'\tUser input: <{self.user_command}>, <{self.user_input}>')
         except:
+            # Reset user command and input to empty strings
+            self.user_command = ''
+            self.user_input = ''
+            
             # List Widget has to be cleared if no valid user input is available
             self.lst.clear()
             self.main_win_small()
             return
 
         # Handling of bookmarks
-        if command == 'b' and user_input == '':
+        if self.user_command == 'b' and self.user_input == '':
             my_bookmarks = self.read_bookmark_files()
             self.lst.clear()
             for bm in my_bookmarks:
                 self.lst.addItem(bm)
             self.main_win_large()
-        elif command == 'b' and user_input:
+        elif self.user_command == 'b' and self.user_input:
             my_bookmarks = self.read_bookmark_files()
             self.lst.clear()
             for bm in my_bookmarks:
-                if user_input.lower() in bm.lower():
+                if self.user_input.lower() in bm.lower():
                     self.lst.addItem(bm)
             self.main_win_large()
+        # No known command
         else:
             self.lst.clear()
             self.main_win_small()
@@ -112,7 +119,19 @@ class MyWindow(QMainWindow):
         if self.FOCUS == 'List Widget':
             self.list_return()
         elif self.FOCUS == 'Line Edit':
-            self.line_edit_return()
+            if self.user_command == 'b':
+                self.line_edit_return()
+            elif self.user_command == 'p' and self.user_input:
+                settings = self.read_config_file()
+                cmd = settings['PCR-URL']
+                cmd = cmd + self.user_input
+                self.rund_command(cmd)
+            # Handle CSCs
+            elif self.user_command == 'c' and self.user_input:
+                settings = self.read_config_file()
+                cmd = settings['CSC-URL']
+                cmd = cmd + self.user_input
+                self.run_command(cmd)
         else:
             print('Error in RETURN handler')
 
@@ -152,7 +171,7 @@ class MyWindow(QMainWindow):
         """Returns a list of lists containing the bookmarks titles and URLs."""
 
         lines = {}
-        for entry in glob.glob('./config_files/*'):
+        for entry in glob.glob('./config_files/bookmarks/*'):
             if filetype in entry:
                 with open(entry) as cf:
                     # Read the file content line by line
@@ -166,6 +185,18 @@ class MyWindow(QMainWindow):
                             # Append Title and Command to the others
                             lines[title] = command
         return lines
+
+    def read_config_file(self):
+        '''Returns configuration settings in a dict'''
+        settings = {}
+        cfg_file = './config_files/get-it-slim_conf.txt'
+        with open(cfg_file) as cfg:
+            for line in cfg:
+                if '|' in line:
+                    line = line.strip()
+                    key, value = line.split('|', 1)
+                    settings[key] = value
+        return settings
 
 def window():
     '''Main function'''
