@@ -1,10 +1,20 @@
 # get-it slim
 
-## To Do
-   * List widget shows up as soon as user starts to type and hits are available
-   * Depending on prefix RETURN takes over either the input from the line edit or the list
-   * Prefixes in the line edit decide about further processing of the users input
-      * none - Looking for bookmarks
-      * #p   - Opening PCR URL
-      * #c   - Opening CSC URL
-      * #e   - Passes input to Everything on Win and to ?? on Linux
+## Purpose
+The script is a combination of a bookmark tool and a program launcher.
+Intention is to have an extremely simple interface and a small footprint.
+
+## Available commands
+   * b  - Activate bookmark / run command
+   * c  - Open CSC in PCR tool
+   * p  - Open PCR in PCR tool
+
+## Limitations
+The PCR tool functions are company specific and are thus not of use for others.
+
+## Linux
+The script is tested on Linux Mint only.
+
+## Windows
+The script is tested on Win 10 only.
+To hide the console just rename the script main.py to main.pyw.
