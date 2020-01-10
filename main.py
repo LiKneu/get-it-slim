@@ -11,8 +11,11 @@ import glob
 from PyQt5.Qt import Qt
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QEvent
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QSystemTrayIcon
+from PyQt5.QtWidgets import QMenu
 
 # Create a class of the main window to allow all widgets that are placed on it
 # to communicate with each other
@@ -23,14 +26,25 @@ class MyWindow(QMainWindow):
         '''Initializes the Main Window'''
         super(MyWindow, self).__init__()
         self.setGeometry(800, 200, 300, 167)
-        self.setWindowTitle('g-i-s     v.2020-01-09')
+        self.setWindowTitle('g-i-s     v.2020-01-10')
         self.init_ui()
         self.user_command = ''
         self.user_input = ''
 
     def init_ui(self):
         '''Initializes the elements on the Main Window'''
-
+        # Tray icon
+        self.tray_icon = QSystemTrayIcon(QIcon('./config_files/Cubitus.ico'), parent=self)
+        self.tray_icon.setToolTip('get-it-slim')
+        self.tray_icon.show()
+        self.tray_menu = QMenu()
+        
+        self.tray_menu_show = self.tray_menu.addAction('show')
+        # ~ self.tray_menu_show.triggered.connect(self.show_gis)
+        self.tray_menu_hide = self.tray_menu.addAction('hide')
+        # ~ self.tray_menu_show.triggered.connect(self.hide_gis)
+        self.tray_icon.setContextMenu(self.tray_menu)
+        
         # Line Edit
         self.le_input = QtWidgets.QLineEdit(self)
         self.le_input.setGeometry(2, 0, 296, 30)
